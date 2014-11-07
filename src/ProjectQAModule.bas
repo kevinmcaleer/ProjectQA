@@ -1,22 +1,30 @@
 Attribute VB_Name = "ProjectQAModule"
 Option Explicit
-'This module contains a macro which will display
-'QA info in a message box
-'Created by Sean Boyle, SDB Projects Ltd, for the British Council September 2014
-'Updated by Kevin McAleer, Advice Factory Ltd, for the British Council November 2014
-'Code optimised to run in a single pass, with a status message
-'Also added a dialogbox to show progress whilst running as well as updating the statusbar with progress.
-'There is now an about box as well
-'Version 2.1 06/11/2014
+' +---------------------------------------------------------+
+' | AUTHOR: Kevin McAleer / Sean Boyle                      |
+' | EMAIL: kevin.mcaleer@advicefactory.co.uk                |
+' | DATE: 06/11/2014                                        |
+' | VERSION: 2.1                                            |
+' | PURPOSE: Analyses a Microsoft Project file for issues   |
+' +---------------------------------------------------------+
+'
+' This module contains a macro which will display
+' QA info in a message box
+' Created by Sean Boyle, SDB Projects Ltd, for the British Council September 2014
+' Updated by Kevin McAleer, Advice Factory Ltd, for the British Council November 2014
+' Code optimised to run in a single pass, with a status message
+' Also added a dialogbox to show progress whilst running as well as updating the statusbar with progress.
+' There is now an about box as well
 
 'TODO: Refactor the variable names to improve legability
 'TODO: Do file check and project status date checks before running any code.
 
-Dim MNcount As Integer  'milestones without preds
-Dim DIcount As Integer  'dep ins
-Dim DOcount As Integer  'dep outs
-Dim ITcount As Integer 'Incomplete tasks
-Dim LTcount As Integer 'Over 5d in 8w
+' Initialise variables
+Dim MNcount As Integer              'milestones without preds
+Dim DIcount As Integer              'dep ins
+Dim DOcount As Integer              'dep outs
+Dim ITcount As Integer              'Incomplete tasks
+Dim LTcount As Integer              'Over 5d in 8w
 Dim Fcount As Integer   'finishes in 8w count
 Dim TMcount As Integer 'Key milestones
 Dim MPcount As Integer 'Missing pred on outbound
