@@ -1,5 +1,5 @@
-Option Explicit On
-Attribute VB_Name = "Module11"
+Attribute VB_Name = "ProjectQAModule"
+Option Explicit
 'This module contains a macro which will display
 'QA info in a message box
 'Created by Sean Boyle, SDB Projects Ltd, for the British Council September 2014
@@ -10,6 +10,8 @@ Attribute VB_Name = "Module11"
 'Version 2.1 06/11/2014
 
 'TODO: Refactor the variable names to improve legability
+'TODO: Do file check and project status date checks before running any code.
+
 Dim MNcount As Integer  'milestones without preds
 Dim DIcount As Integer  'dep ins
 Dim DOcount As Integer  'dep outs
@@ -52,7 +54,7 @@ Dim percentComplete As Integer
 Dim issueLog As String          ' Issue Log
 Dim totalIssues As Integer      ' stores the total number of issues
 
-Sub QA_Chex2()
+Sub projectQualityAssurance()
 
 SU = ActiveProject.StatusDate
 If SU = "N/A" Then
@@ -300,7 +302,7 @@ codeRunTime = codeStartTime - codeFinishtime    ' work out how long the code too
 issueLog = issueLog & "----------------------------------" & vbLf
 issueLog = issueLog & "Analysis Complete." & vbLf
 issueLog = issueLog & taskCount & " tasks took " & codeRunTime & " seconds to check." & vbLf
-issueLog = issueLog & "A total of " & totalIssues & " were found" & vbLf
+issueLog = issueLog & "A total of " & totalIssues & " issues were found" & vbLf
 issueLog = issueLog & vbLf & vbLf & "Please contact the PMO if you need any assistance to resolve these issues."
 UserForm1.TextBox1.Value = issueLog
 ' ********************************************************************************************
