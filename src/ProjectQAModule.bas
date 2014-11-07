@@ -1,9 +1,6 @@
 Attribute VB_Name = "ProjectQAModule"
 Option Explicit
-'This module contains a macro which will display
-'QA info in a message box
-'Created by Sean Boyle, SDB Projects Ltd, for the British Council September 2014
-'Updated by Kevin McAleer, Advice Factory Ltd, for the British Council November 2014
+'Created by Kevin McAleer, Advice Factory Ltd, November 2014
 'Code optimised to run in a single pass, with a status message
 'Also added a dialogbox to show progress whilst running as well as updating the statusbar with progress.
 'There is now an about box as well
