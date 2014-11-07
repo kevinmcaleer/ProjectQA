@@ -20,5 +20,5 @@ End Sub
 
 
 Private Sub UserForm_Initialize()
-    TextBox1.Value = "This Macro was written by Sean Boyle & Kevin McAleer in November 2014, and remains the intellectual property of the British Council."
+    TextBox1.Value = "This Macro was written by Kevin McAleer Copyright 2014."
 End Sub
