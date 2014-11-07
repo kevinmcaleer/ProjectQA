@@ -147,6 +147,7 @@ UserForm1.lblCompleteInFuture.Caption = IFcount
 UserForm1.lblResourcesAssigned.Caption = SRcount
 UserForm1.lblNoPred.Caption = NScount
 UserForm1.lblNoSuccessors = NPcount
+UserForm1.LblManualTasks = MAcount
 
 codeStartTime = Now()                   ' capture the start time of the code
 issueLog = issueLog & "Project Quality Assurance Analysis" & vbLf
@@ -280,6 +281,7 @@ For Each t In ActiveProject.Tasks
         If t.Manual = "True" And t.percentComplete <> 100 And t.ExternalTask = False Then
             MAcount = MAcount + 1                               ' 17 Count manually scheduled tasks. issue
             t.Text25 = t.Text25 & "Manually Scheduled. "
+            UserForm1.LblManualTasks = MAcount
             issueLog = issueLog + "Task no " & t & " is manually assigned " & vbLf
         End If
         
@@ -296,6 +298,25 @@ For Each t In ActiveProject.Tasks
     DoEvents
 Next t
 'UserForm1.Hide
+UserForm1.lblFinishDate.Caption = FD
+UserForm1.lblStatusDate.Caption = SD
+UserForm1.lblImboundDependencies.Caption = DIcount
+UserForm1.lblOutboundDependencies.Caption = DOcount
+UserForm1.lblRemainingTasks.Caption = ITcount
+UserForm1.lblKeyMilestones.Caption = TMcount
+UserForm1.lblOutBoundPred.Caption = MPcount
+UserForm1.lbl5dayslong.Caption = LTcount
+UserForm1.lblTasksFinishingSoon.Caption = Fcount
+UserForm1.CommandButton2.Enabled = False
+UserForm1.CommandButton1.Caption = "Ok"
+UserForm1.lblover20D.Caption = TLcount
+UserForm1.lblWorkInPast.Caption = NUcount
+UserForm1.lblCompleteInFuture.Caption = IFcount
+UserForm1.lblResourcesAssigned.Caption = SRcount
+UserForm1.lblNoPred.Caption = NScount
+UserForm1.lblNoSuccessors = NPcount
+UserForm1.LblManualTasks = MAcount
+
 percentComplete = TCount / taskCount * 100
 totalIssues = MPcount + LTcount + MScount + TLcount + NScount + NPcount + NFcount + NUcount + IFcount + SRcount + MAcount + HCcount ' calculate the total number of issues
 UserForm1.Show vbModeless
