@@ -14,11 +14,23 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-
-
-
 Private Sub btnAbout_Click()
     FrmAbout.Show
+End Sub
+
+Private Sub btnStop_Click()
+    ' Stop the macro from running
+    
+    ' First reset the status bar
+    Application.StatusBar = ""
+    
+    ' then make sure the options are returned to normal
+    Application.ScreenUpdating = True
+    Application.Calculation = pjAutomatic
+    DoEvents
+    
+    ' then stop the macro
+    End
 End Sub
 
 Private Sub CommandButton1_Click()
