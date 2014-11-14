@@ -181,7 +181,7 @@ For n = 1 To taskCount
     UserForm1.Caption = "Microsoft Project Quality Assurance Check | " & percentComplete & "% Complete | time remaining: " & eta
     
     'If (Not ActiveProject.Tasks(n) Is Nothing) And (ActiveProject.Tasks(n).percentComplete <> 100) Then
-    If (ActiveProject.Tasks(n).percentComplete <> 100) Then
+    If (ActiveProject.Tasks(n).percentComplete <> 100) And (Not ActiveProject.Tasks(n).Summary) Then
         percentComplete = TCount / taskCount * 100              ' calculate the percent complete
         TCount = TCount + 1
         ActiveProject.Tasks(n).Text25 = ""                                           ' 1 Clear issue field (Needed if errors written to Text25)
