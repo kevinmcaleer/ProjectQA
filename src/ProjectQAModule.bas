@@ -151,8 +151,27 @@ UserForm1.lblWorkInPast.Caption = NUcount
 UserForm1.lblCompleteInFuture.Caption = IFcount
 UserForm1.lblResourcesAssigned.Caption = SRcount
 UserForm1.lblNoPred.Caption = NScount
-UserForm1.lblNoSuccessors = NPcount
-UserForm1.LblManualTasks = MAcount
+UserForm1.lblNoSuccessors.Caption = NPcount
+UserForm1.LblManualTasks.Caption = MAcount
+UserForm1.lblMilestoneSuccess.Caption = MScount
+UserForm1.lblNegFloat.Caption = NFcount
+UserForm1.lblHardConstraints.Caption = HCcount
+UserForm1.lblBaseline = BU ' baseline date
+
+'set all the checkboxes to true / ticked
+UserForm1.cb5days.Value = True
+UserForm1.cbOutBound.Value = True
+UserForm1.cb20days.Value = True
+UserForm1.cbNoPred.Value = True
+UserForm1.cbWorkPast.Value = True
+UserForm1.cbFuture.Value = True
+UserForm1.cbSummary.Value = True
+UserForm1.cbSuccess.Value = True
+UserForm1.cbManual.Value = True
+UserForm1.cbNegFloat.Value = True
+UserForm1.cbHardConstraints.Value = True
+UserForm1.cbOutBound.Value = True
+UserForm1.cbMilestones.Value = True
 
 codeStartTime = Now()                   ' capture the start time of the code
 issueLog = issueLog & "Project Quality Assurance Analysis" & vbLf
@@ -186,36 +205,40 @@ For n = 1 To taskCount
         TCount = TCount + 1
         ActiveProject.Tasks(n).Text25 = ""                                           ' 1 Clear issue field (Needed if errors written to Text25)
         
-        Call check_Inbound
-        Call check_Outbound
-        Call count_RemainingTasks
-        Call count_Milestones
-        Call count_Outbound_withoutPred
-        Call count_tasks8weeks
-        Call count_tasks5days
-        Call count_MilestonesNoSuccess
-        Call count_TasksOver20d
-        Call check_NoSuccess
-        Call check_NoPred
-        Call check_NegFloat
-        Call check_WorkInPast
-        Call check_WorkInFuture
-        Call check_SummaryResources
-        Call check_ManuallyScheduled
-        Call check_HardConstraints
+        ' check that are just for info
+        If UserForm1.cbInfoSelectAll Then
+            Call check_Inbound
+            Call check_Outbound
+            Call count_RemainingTasks
+            Call count_Milestones
+            Call count_tasks8weeks
+        End If
+        
+        ' checks that detect issues
+        If UserForm1.cbOutBound.Value Then Call count_Outbound_withoutPred
+        If UserForm1.cb5days.Value Then Call count_tasks5days
+        If UserForm1.cbMilestones.Value Then Call count_MilestonesNoSuccess
+        If UserForm1.cb20days.Value Then Call count_TasksOver20d
+        If UserForm1.cbSuccess.Value Then Call check_NoSuccess
+        If UserForm1.cbNoPred.Value Then Call check_NoPred
+        If UserForm1.cbNegFloat.Value Then Call check_NegFloat
+        If UserForm1.cbWorkPast.Value Then Call check_WorkInPast
+        If UserForm1.cbFuture.Value Then Call check_WorkInFuture
+        If UserForm1.cbSummary.Value Then Call check_SummaryResources
+        If UserForm1.cbManual.Value Then Call check_ManuallyScheduled
+        If UserForm1.cbHardConstraints.Value Then Call check_HardConstraints
         
     End If
     Application.StatusBar = "Quality Assurance Analyser Running | Reading Task: " & TCount & "/" & taskCount & " | " & percentComplete & "%"
-    UserForm1.TextBox1.Value = issueLog
+    
     DoEvents
 Next n
 
 ' these three settings are now set to normal after the macro has run
 Application.ScreenUpdating = True
-Application.Calculation = pjAutomatic
 DoEvents
 
-'UserForm1.Hide
+' Update the userform with the latest
 UserForm1.lblFinishDate.Caption = FD
 UserForm1.lblStatusDate.Caption = SD
 UserForm1.lblImboundDependencies.Caption = DIcount
@@ -231,11 +254,13 @@ UserForm1.lblover20D.Caption = TLcount
 UserForm1.lblWorkInPast.Caption = NUcount
 UserForm1.lblCompleteInFuture.Caption = IFcount
 UserForm1.lblResourcesAssigned.Caption = SRcount
-UserForm1.lblNoPred.Caption = NScount
-UserForm1.lblNoSuccessors = NPcount
+UserForm1.lblNoPred.Caption = NPcount
+UserForm1.lblNoSuccessors = NScount
 UserForm1.LblManualTasks = MAcount
+UserForm1.lblNegFloat = NFcount
+UserForm1.lblMilestoneSuccess.Caption = MScount
 
-percentComplete = TCount / taskCount * 100
+percentComplete = 100 ' set it to 100%
 totalIssues = MPcount + LTcount + MScount + TLcount + NScount + NPcount + NFcount + NUcount + IFcount + SRcount + MAcount + HCcount ' calculate the total number of issues
 UserForm1.Show vbModeless
 UserForm1.lblTask.Caption = "Task No: " & TCount & "/" & taskCount ' display the task number
@@ -258,6 +283,9 @@ UserForm1.TextBox1.Value = issueLog
 
 UserForm1.CommandButton2.Enabled = True ' show the print button
 UserForm1.CommandButton1.Caption = "Close"
+
+'TODO The next line caused a crash when Sean ran it on Project 2010. the message was 'error 1100: the method is not available in this situation'
+Application.Calculation = pjAutomatic
 Err:
 End Sub
 
@@ -265,6 +293,7 @@ Function check_Inbound()
     If ActiveProject.Tasks(n).Text14 = "In" Then                                 ' 2 Count inbound dependencies. Information
         DIcount = DIcount + 1
         UserForm1.lblImboundDependencies.Caption = DIcount
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -272,6 +301,7 @@ Function check_Outbound()
     If ActiveProject.Tasks(n).Text14 = "Out" Then                                ' 3 Count outbound dependencies. Information
         DOcount = DOcount + 1
         UserForm1.lblOutboundDependencies.Caption = DOcount
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -279,6 +309,7 @@ Function count_RemainingTasks()
     If ActiveProject.Tasks(n).percentComplete <> 100 And ActiveProject.Tasks(n).Summary = False Then  ' 4 Count remaining tasks. Information
         ITcount = ITcount + 1
         UserForm1.lblRemainingTasks.Caption = ITcount
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -286,6 +317,7 @@ Function count_Milestones()
     If ActiveProject.Tasks(n).Text10 = "Yes" Then                                ' 5 Count key milestones. Information
         TMcount = TMcount + 1
         UserForm1.lblKeyMilestones.Caption = TMcount
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -295,6 +327,7 @@ Function count_Outbound_withoutPred()
         UserForm1.lblOutBoundPred.Caption = MPcount
         issueLog = issueLog + "Task no " & n & " has an outbound milestone without a predeccessor" & vbLf
         ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & ". has an outbound milestone without a predeccessor"
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -302,6 +335,7 @@ Function count_tasks8weeks()
     If ActiveProject.Tasks(n).Finish < (ActiveProject.StatusDate + 56) And ActiveProject.Tasks(n).percentComplete <> 100 And ActiveProject.Tasks(n).Summary = False Then
         Fcount = Fcount + 1                                 ' 7 Count tasks finishing within 8w. Information
         UserForm1.lblTasksFinishingSoon.Caption = Fcount
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -311,6 +345,7 @@ Function count_tasks5days()
         UserForm1.lbl5dayslong.Caption = LTcount
         issueLog = issueLog + "Task no " & n & " is within the next 8 weeks and is more than 5 days in duration" & vbLf
         ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & ". is within the next 8 weeks and is more than 5 days in duration"
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -319,6 +354,8 @@ Function count_MilestonesNoSuccess()
         MScount = MScount + 1                               ' 9 Count inbound milestones with no successors. Issue
         issueLog = issueLog + "Task no " & n & " is an inbound milestone with no successor" & vbLf
         ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & ". is an inbound milestone with no successor"
+        UserForm1.lblMilestoneSuccess.Caption = MScount
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -328,6 +365,7 @@ Function count_TasksOver20d()
         ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Over 20d. "
         UserForm1.lblover20D.Caption = TLcount
         issueLog = issueLog + "Task no " & n & " is over 20 days long" & vbLf
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
@@ -337,24 +375,27 @@ Function check_NoSuccess()
         ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "No Successor. "              ' 11 Count tasks with no successors. Issue
         issueLog = issueLog + "Task no " & n & " has no successors " & vbLf
         UserForm1.lblNoSuccessors = NScount
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
 
 Function check_NoPred()
-If ActiveProject.Tasks(n).Predecessors = "" And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).percentComplete <> 100 And ActiveProject.Tasks(n).ExternalTask = False Then
-            NPcount = NPcount + 1                               ' 12 Count tasks with no predecessors. Issue
-            ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "No Predecessor. "
-            issueLog = issueLog + "Task no " & n & " has no predeccessors " & vbLf
-            UserForm1.lblNoPred.Caption = NPcount
-        End If
+    If ActiveProject.Tasks(n).Predecessors = "" And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).percentComplete <> 100 And ActiveProject.Tasks(n).ExternalTask = False Then
+        NPcount = NPcount + 1                               ' 12 Count tasks with no predecessors. Issue
+        ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "No Predecessor. "
+        issueLog = issueLog + "Task no " & n & " has no predeccessors " & vbLf
+        UserForm1.lblNoPred.Caption = NPcount
+        UserForm1.TextBox1.Value = issueLog
+    End If
 End Function
 Function check_NegFloat()
-If ActiveProject.Tasks(n).TotalSlack < 0 And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).percentComplete <> 100 Then
-            NFcount = NFcount + 1                               ' 13 Count Tasks with negative float. Issue
-            ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Negative Float. "
-            issueLog = issueLog + "Task no " & n & " has a negative float " & vbLf
-            
-        End If
+    If ActiveProject.Tasks(n).TotalSlack < 0 And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).percentComplete <> 100 Then
+        NFcount = NFcount + 1                               ' 13 Count Tasks with negative float. Issue
+        ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Negative Float. "
+        issueLog = issueLog + "Task no " & n & " has a negative float " & vbLf
+        UserForm1.lblNegFloat = NFcount
+        UserForm1.TextBox1.Value = issueLog
+    End If
 End Function
 
 Function check_WorkInPast()
@@ -363,6 +404,7 @@ Function check_WorkInPast()
             ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Incomplete in past. "
             issueLog = issueLog + "Task no " & n & " has work in the past " & vbLf
             UserForm1.lblWorkInPast.Caption = NUcount
+            UserForm1.TextBox1.Value = issueLog
         End If
         
         If ActiveProject.Tasks(n).percentComplete <> 100 And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).Finish > ActiveProject.StatusDate And ActiveProject.Tasks(n).Resume <= ActiveProject.StatusDate Then
@@ -370,6 +412,7 @@ Function check_WorkInPast()
             ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Incomplete in past. "
             issueLog = issueLog + "Task no " & n & " has work in the past " & vbLf
             UserForm1.lblWorkInPast.Caption = NUcount
+            UserForm1.TextBox1.Value = issueLog
         End If
         
         If ActiveProject.Tasks(n).percentComplete = 0 And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).Finish > ActiveProject.StatusDate And ActiveProject.Tasks(n).Start < ActiveProject.StatusDate Then
@@ -377,36 +420,40 @@ Function check_WorkInPast()
             ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Incomplete in past. "
             issueLog = issueLog + "Task no " & n & " has work in the past " & vbLf
             UserForm1.lblWorkInPast.Caption = NUcount
+            UserForm1.TextBox1.Value = issueLog
         End If
 End Function
 
 Function check_WorkInFuture()
-If ActiveProject.Tasks(n).ActualStart <> "NA" And ActiveProject.Tasks(n).ActualStart > ActiveProject.StatusDate Then
-            IFcount = IFcount + 1                               ' 15 Count tasks with work complete in the future. Issue
-            ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Complete in future. "
-            issueLog = issueLog + "Task no " & n & " has work completed in the future " & vbLf
-            UserForm1.lblCompleteInFuture.Caption = IFcount
-        End If
+    If ActiveProject.Tasks(n).ActualStart <> "NA" And ActiveProject.Tasks(n).ActualStart > ActiveProject.StatusDate Then
+        IFcount = IFcount + 1                               ' 15 Count tasks with work complete in the future. Issue
+        ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Complete in future. "
+        issueLog = issueLog + "Task no " & n & " has work completed in the future " & vbLf
+        UserForm1.lblCompleteInFuture.Caption = IFcount
+        UserForm1.TextBox1.Value = issueLog
+    End If
 End Function
 
 Function check_SummaryResources()
      If ActiveProject.Tasks(n).Summary = "True" And ActiveProject.Tasks(n).percentComplete <> 100 Then
-            If Not ActiveProject.Tasks(n).ResourceNames = "" Then                        ' 16 Count Summary resources with resources assigned
-                SRcount = SRcount + 1
-                ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Summary resourced. "
-                issueLog = issueLog + "Task no " & n & " is a summary task with resources assigned " & vbLf
-                UserForm1.lblResourcesAssigned.Caption = SRcount
-            End If
+        If Not ActiveProject.Tasks(n).ResourceNames = "" Then                        ' 16 Count Summary resources with resources assigned
+            SRcount = SRcount + 1
+            ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Summary resourced. "
+            issueLog = issueLog + "Task no " & n & " is a summary task with resources assigned " & vbLf
+            UserForm1.lblResourcesAssigned.Caption = SRcount
+            UserForm1.TextBox1.Value = issueLog
         End If
+    End If
 End Function
 
 Function check_ManuallyScheduled()
-If ActiveProject.Tasks(n).Manual = "True" And ActiveProject.Tasks(n).percentComplete <> 100 And ActiveProject.Tasks(n).ExternalTask = False Then
-            MAcount = MAcount + 1                               ' 17 Count manually scheduled tasks. issue
-            ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Manually Scheduled. "
-            UserForm1.LblManualTasks = MAcount
-            issueLog = issueLog + "Task no " & n & " is manually assigned " & vbLf
-        End If
+    If ActiveProject.Tasks(n).Manual = "True" And ActiveProject.Tasks(n).percentComplete <> 100 And ActiveProject.Tasks(n).ExternalTask = False Then
+        MAcount = MAcount + 1                               ' 17 Count manually scheduled tasks. issue
+        ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Manually Scheduled. "
+        UserForm1.LblManualTasks = MAcount
+        issueLog = issueLog + "Task no " & n & " is manually assigned " & vbLf
+        UserForm1.TextBox1.Value = issueLog
+    End If
 End Function
 
 Function check_HardConstraints()
@@ -414,5 +461,7 @@ Function check_HardConstraints()
         HCcount = HCcount + 1                               ' 18 Count hard constraints. Issue
         ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Constrained. "
         issueLog = issueLog + "Task no " & n & " has hard constraints " & vbLf
+        UserForm1.lblHardConstraints = HCcount
+        UserForm1.TextBox1.Value = issueLog
     End If
 End Function
