@@ -9,7 +9,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 'This is the Check Class
 
-private name As String
+Private name As String
+Public checkPredecessors As clsCheck
+
+
 Public Property Set name(s As String)
     name = s
 End Property
@@ -17,3 +20,5 @@ End Property
 Public Property Let name(s As String)
     s = name
 End Property
+
+'need code here to implement the class.runTest() code
