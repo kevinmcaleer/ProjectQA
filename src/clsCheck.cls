@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 'This is the Check Class
 
-Dim name As String
+private name As String
 Public Property Set name(s As String)
     name = s
 End Property
