@@ -340,7 +340,7 @@ Function count_tasks8weeks()
 End Function
 
 Function count_tasks5days()
-    If ActiveProject.Tasks(n).Start < (ActiveProject.StatusDate + 56) And ActiveProject.Tasks(n).duration > 2400 And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).percentComplete <> 100 Then
+    If ActiveProject.Tasks(n).Start < (ActiveProject.StatusDate + 56) And ActiveProject.Tasks(n).Duration > 2400 And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).percentComplete <> 100 Then
         LTcount = LTcount + 1                               ' 8 Count tasks over 5 days long within next 8 weeks. Issue
         UserForm1.lbl5dayslong.Caption = LTcount
         issueLog = issueLog + "Task no " & n & " is within the next 8 weeks and is more than 5 days in duration" & vbLf
@@ -360,7 +360,7 @@ Function count_MilestonesNoSuccess()
 End Function
 
 Function count_TasksOver20d()
-    If ActiveProject.Tasks(n).duration > 9600 And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).percentComplete <> 100 Then
+    If ActiveProject.Tasks(n).Duration > 9600 And ActiveProject.Tasks(n).Summary = False And ActiveProject.Tasks(n).percentComplete <> 100 Then
         TLcount = TLcount + 1                               ' 10 Count tasks over 20d long. Issue
         ActiveProject.Tasks(n).Text25 = ActiveProject.Tasks(n).Text25 & "Over 20d. "
         UserForm1.lblover20D.Caption = TLcount
