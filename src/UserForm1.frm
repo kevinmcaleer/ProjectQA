@@ -17,8 +17,13 @@ Attribute VB_Exposed = False
 
 
 
+
 Private Sub btnAbout_Click()
     FrmAbout.Show
+End Sub
+
+Private Sub btnstart_Click()
+    ' Start the QA Process
 End Sub
 
 Private Sub btnStop_Click()
@@ -96,6 +101,4 @@ Private Sub CommandButton2_Click()
 End Sub
 
 
-Private Sub UserForm_Click()
 
-End Sub

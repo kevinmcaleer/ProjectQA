@@ -3,7 +3,7 @@ Option Explicit
 ' +---------------------------------------------------------+
 ' | AUTHOR: Kevin McAleer / Sean Boyle                      |
 ' | EMAIL: kevin.mcaleer@advicefactory.co.uk                |
-' | DATE: 11/11/2014                                        |
+' | DATE: 23/11/2014                                        |
 ' | VERSION: 2.2                                            |
 ' | PURPOSE: Analyses a Microsoft Project file for issues   |
 ' +---------------------------------------------------------+
@@ -18,6 +18,8 @@ Option Explicit
 
 'TODO: Refactor the variable names to improve legability
 'TODO: Do file check and project status date checks before running any code.
+' ChangeLog
+' Added Start/Restart button
 
 ' Initialise variables
 Dim MNcount As Integer              'milestones without preds
