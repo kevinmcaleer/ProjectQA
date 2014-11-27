@@ -15,10 +15,10 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+Option Compare Text
 'ProjectQAView
 
 Public loopstate As Boolean
-Public initstate As Boolean
 
 Private Sub btnAbout_Click()
     FrmAbout.Show
@@ -112,7 +112,12 @@ End Sub
 
 
 Public Sub initialise(pr As ProjectQAModel)
+    Static initstate As Boolean
+    'initstate = True
+    Call Me.refreshIssueCount(pr)
+    ProjectQAView.lblVer.Caption = pr.ver ' set the version number
     ProjectQAView.TextBox1.Value = "" ' empty the textbox content
+    ProjectQAView.TextBox1 = pr.issueLog
     
     'Setup the Userform with values from the project file
     ProjectQAView.lblFinishDate.Caption = pr.FinishDate
@@ -155,6 +160,10 @@ Public Sub initialise(pr As ProjectQAModel)
     ProjectQAView.cbMilestones.Value = True
     initstate = False
     End If
+    
+    Application.ScreenUpdating = True
+    DoEvents
+    Call Me.refreshAll(pr)
 End Sub
 
 Function update_outbound(pr As ProjectQAModel)
@@ -225,12 +234,6 @@ Function update_HardConstraints(pr As ProjectQAModel)
     Me.lblHardConstraints = pr.HCcount
 End Function
 
-Public Sub startup(pr As ProjectQAModel)
-    Application.ScreenUpdating = True
-    DoEvents
-    Call Me.refreshAll(pr)
-End Sub
-
 Public Sub finished(pr As ProjectQAModel)
     Me.CommandButton2.Enabled = True ' show the print button
     Me.btnOk.Caption = "Close"
@@ -273,6 +276,7 @@ Public Sub refreshAll(pr As ProjectQAModel)
     Me.lblTask.Caption = "Task No: " & pr.TCount + pr.SLcount & "/" & pr.TaskCount
     ' update the title with percentage complete and time remaining.
     Me.Caption = "Microsoft Project Quality Assurance Check | " & pr.percentComplete & "% Complete"
+    Me.TextBox1 = pr.issueLog
     
 End Sub
 
@@ -282,4 +286,15 @@ Public Function TogglePrintButton()
     Else
     Me.CommandButton2.Enabled = True
     End If
+    Me.TextBox1.SetFocus
 End Function
+
+
+Public Function refreshIssueCount(pr As ProjectQAModel)
+    Me.Frame2.Caption = "Issues: " & pr.totalIssues
+End Function
+
+
+Private Sub UserForm_Click()
+
+End Sub

@@ -8,15 +8,18 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+Option Compare Text
 'ProjectQAModel
 
+Private Const version = "Version 2.3"
+
 ' Initialise variables
-Public MNcount As Integer              'milestones without preds
-Public DIcount As Integer              'dep ins
-Public DOcount As Integer              'dep outs
-Public ITcount As Integer              'Incomplete tasks
-Public LTcount As Integer              'Over 5d in 8w
-Public Fcount As Integer   'finishes in 8w count
+Public MNcount As Integer  'milestones without preds
+Public DIcount As Integer  'dep ins
+Public DOcount As Integer  'dep outs
+Public ITcount As Integer  'Incomplete tasks
+Public LTcount As Integer  'Over 5d in 8w
+Public Fcount As Integer  'finishes in 8w count
 Public TMcount As Integer 'Key milestones
 Public MPcount As Integer 'Missing pred on outbound
 Public MScount As Integer 'Missing succ on inbound
@@ -31,17 +34,18 @@ Public SLcount As Integer 'summary task links
 Public SRcount As Integer 'summary tasks with resources
 Public MAcount As Integer 'Manually scheduled tasks
 Public HCcount As Integer 'Hard constraints
-Public ProjectStatus As String       'project status
-Public StatusDate As String       'status date
-Public StatusdateUnformatted As String       'unformatted status date
-Public FinishDate As Date         'project finish date
-Public BaselineFinish As String       'project baseline finish
-Public BaselineUnformated As String       'unformatted last baselined date
-Public BaselinedDated As String        'last baselined date
+Public ProjectStatus As String 'project status
+Public StatusDate As String 'status date
+Public StatusdateUnformatted As String 'unformatted status date
+Public FinishDate As Date 'project finish date
+Public BaselineFinish As String 'project baseline finish
+Public BaselineUnformated As String 'unformatted last baselined date
+Public BaselinedDated As String 'last baselined date
 Public fso As FileSystemObject ' file system object - for writing out the log file
 Public proj As Project ' the project itself
 Private t As task ' a task object
 Public continue As Boolean
+Public name As String ' project name
 
 ' These Variables help the program display status items
 Public codeStartTime As Date      ' measures the start time of the code, to measure how long it took to run.
@@ -53,6 +57,10 @@ Public issueLog As String           ' Issue Log
 Public totalIssues As Integer      ' stores the total number of issues
 'Private n As Integer ' loop counter
 Public eta As Date ' time remaining to calculate
+
+Public Property Get ver() As String
+    ver = version
+End Property
 
 
 Public Sub initialise()
@@ -78,7 +86,36 @@ Public Sub initialise()
     Me.percentComplete = 0                     ' Clear the percentage complete
     Me.issueLog = ""                           ' clear the issue log
     Me.totalIssues = 0                         ' clear the total number of issues
+    Me.name = ActiveProject.name               ' set the project name
+    If Me.StatusdateUnformatted = "N/A" Then
+        MsgBox ("The project Status Date must be set before running this macro."), vbOKOnly, "British Council - Plan Quality Dashboard"
+        End
+    End If
+
+    Me.StatusdateUnformatted = ActiveProject.StatusDate
+    Me.StatusDate = Format(ActiveProject.StatusDate, "dd/mm/yy")
+    Me.FinishDate = Format(ActiveProject.Finish, "dd/mm/yy")
+    Me.BaselineFinish = Format(ActiveProject.ProjectSummaryTask.BaselineFinish, "dd/mm/yy")
+    Me.BaselineUnformated = ActiveProject.BaselineSavedDate(pjBaseline)
+    If Me.BaselineUnformated <> "00:00:00" Then Me.BaselinedDated = Format(ActiveProject.BaselineSavedDate(pjBaseline), "dd/mm/yy") Else: Me.BaselinedDated = ActiveProject.BaselineSavedDate(pjBaseline)
+    
+    If ActiveProject.ProjectSummaryTask.Finish > ActiveProject.ProjectSummaryTask.BaselineFinish Then Me.ProjectStatus = " late."
+    If ActiveProject.ProjectSummaryTask.Finish < ActiveProject.ProjectSummaryTask.BaselineFinish Then Me.ProjectStatus = " early."
+    If ActiveProject.ProjectSummaryTask.Finish = ActiveProject.ProjectSummaryTask.BaselineFinish Then Me.ProjectStatus = " on track."
+
+    Me.TaskCount = ActiveProject.Tasks.Count   ' count the number of tasks in the project plan
+    
 End Sub
+
+Public Sub ShowWelcome()
+    Me.issueLog = "Welcome to ProjectQA - Select options then Press Start"
+End Sub
+
+Function addHeaderToIssueLog()
+    Me.issueLog = Me.issueLog & "Project Quality Assurance Analysis" & vbLf
+    Me.issueLog = Me.issueLog & "----------------------------------" & vbLf
+    Me.issueLog = Me.issueLog & "Starting Analysis ->" & vbLf
+End Function
 
 Function check_Outbound(taskno As Integer)
     If ActiveProject.Tasks(taskno).Text14 = "Out" Then                                ' 3 Count outbound dependencies. Information
@@ -129,7 +166,33 @@ End Function
 
 Function addSummaryToIssueLog()
     Me.issueLog = Me.issueLog & "----------------------------------" & vbLf
-    Me.issueLog = Me.issueLog & "Analysis Complete." & vbLf
+    Me.issueLog = Me.issueLog & "Analysis Complete." & vbLf & vbLf
+    Me.issueLog = Me.issueLog & Me.name & vbLf & vbLf
+    Me.issueLog = Me.issueLog & "Current Status Date is " & Me.StatusDate & vbLf
+    Me.issueLog = Me.issueLog & "Current Finish Date is " & Me.FinishDate & vbLf
+    Me.issueLog = Me.issueLog & "Current Baseline Finish Date is " & Me.BaselineFinish & vbLf
+    Me.issueLog = Me.issueLog & "Current Baselined was set on " & Me.BaselinedDated & vbLf
+    Me.issueLog = Me.issueLog & Me.Fcount & " tasks finish in the next 8 weeks." & vbLf
+    Me.issueLog = Me.issueLog & Me.TMcount & " key milestones present." & vbLf
+    Me.issueLog = Me.issueLog & Me.DIcount & " inbound depeneencies." & vbLf
+    Me.issueLog = Me.issueLog & Me.DOcount & " outbound depeneencies." & vbLf
+    Me.issueLog = Me.issueLog & Me.ITcount & " remaining tasks." & vbLf & vbLf
+    
+    Me.issueLog = Me.issueLog & "It has " & Me.totalIssues & " isues in the following areas:" & vbLf & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.NUcount & " incomplete tasks in the past." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.IFcount & " started tasks in the future." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.MScount & " imbound dependencies have no successors." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.MPcount & " outbound dependencies have no predecessors." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.NFcount & " tasks have negative float." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.TLcount & " tasks have durations over 20 days." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.LTcount & " tasks have durations over 5 days in the next 8 weeks." & vbLf
+    
+    Me.issueLog = Me.issueLog & " * " & Me.NPcount & " tasks have no predecessors." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.NScount & " tasks have no succeessors." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.SRcount & " resourced summary tasks." & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.MAcount & " manually scheduled activities" & vbLf
+    Me.issueLog = Me.issueLog & " * " & Me.HCcount & " hard constraints" & vbLf & vbLf
+    
     Me.issueLog = Me.issueLog & Me.TaskCount & " tasks took " & Me.codeRunTime & " seconds to check." & vbLf
     Me.issueLog = Me.issueLog & "A total of " & Me.totalIssues & " issues were found" & vbLf
     Me.issueLog = Me.issueLog & vbLf & vbLf & "Please contact the PMO if you need any assistance to resolve these issues."
@@ -143,12 +206,16 @@ Function count_MilestonesNoSuccess(taskno As Integer)
     End If
 End Function
 
+Function calc_Issues()
+    'calculate stats
+    Me.totalIssues = Me.MPcount + Me.LTcount + Me.MScount + Me.TLcount + Me.NScount + Me.NPcount + Me.NFcount + Me.NUcount + Me.IFcount + Me.SRcount + Me.MAcount + Me.HCcount ' calculate the total number of issues
+
+End Function
+
 Function calculate()
     Me.codeFinishtime = Now()                          ' capture the finish time of the code
     Me.codeRunTime = Me.codeStartTime - Me.codeFinishtime    ' work out how long the code took to run
-    
-    'calculate stats
-    Me.totalIssues = Me.MPcount + Me.LTcount + Me.MScount + Me.TLcount + Me.NScount + Me.NPcount + Me.NFcount + Me.NUcount + Me.IFcount + Me.SRcount + Me.MAcount + Me.HCcount ' calculate the total number of issues
+    Me.calc_Issues
 End Function
 
 Function count_TasksOver20d(taskno As Integer)

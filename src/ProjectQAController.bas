@@ -1,5 +1,6 @@
 Attribute VB_Name = "ProjectQAController"
 Option Explicit
+Option Compare Text
 ' +---------------------------------------------------------+
 ' | AUTHOR: Kevin McAleer / Sean Boyle                      |
 ' | EMAIL: kevin.mcaleer@advicefactory.co.uk                |
@@ -21,6 +22,7 @@ Option Explicit
 ' ChangeLog
 ' Added Start/Restart button
 ' Added new ProjectQAModel class
+' Added Version number on dialogbox
 
 
 ' ProjectQAContoller
@@ -30,36 +32,16 @@ Public Sub ProjectQA()
 Dim p As New ProjectQAModel
 Dim n As Integer
 
+' initialise the projectqa data model
 p.initialise
+
+' initialise the user interface form
 Call ProjectQAView.initialise(p)
 
 p.continue = True ' let the macro continue
-p.StatusdateUnformatted = ActiveProject.StatusDate
 
-Call ProjectQAView.startup(p)
-
-If p.StatusdateUnformatted = "N/A" Then
-    MsgBox ("The project Status Date must be set before running this macro."), vbOKOnly, "British Council - Plan Quality Dashboard"
-    GoTo Err:
-End If
-
-p.StatusDate = Format(ActiveProject.StatusDate, "dd/mm/yy")
-p.FinishDate = Format(ActiveProject.Finish, "dd/mm/yy")
-p.BaselineFinish = Format(ActiveProject.ProjectSummaryTask.BaselineFinish, "dd/mm/yy")
-p.BaselineUnformated = ActiveProject.BaselineSavedDate(pjBaseline)
-If p.BaselineUnformated <> "00:00:00" Then p.BaselinedDated = Format(ActiveProject.BaselineSavedDate(pjBaseline), "dd/mm/yy") Else p.BaselinedDated = ActiveProject.BaselineSavedDate(pjBaseline)
-
-If ActiveProject.ProjectSummaryTask.Finish > ActiveProject.ProjectSummaryTask.BaselineFinish Then p.ProjectStatus = " late."
-If ActiveProject.ProjectSummaryTask.Finish < ActiveProject.ProjectSummaryTask.BaselineFinish Then p.ProjectStatus = " early."
-If ActiveProject.ProjectSummaryTask.Finish = ActiveProject.ProjectSummaryTask.BaselineFinish Then p.ProjectStatus = " on track."
-
+' Show the User Interface form
 ProjectQAView.Show vbModeless
-
-p.TaskCount = ActiveProject.Tasks.Count   ' count the number of tasks in the project plan
-p.codeStartTime = Now()                   ' capture the start time of the code
-p.issueLog = p.issueLog & "Project Quality Assurance Analysis" & vbLf
-p.issueLog = p.issueLog & "----------------------------------" & vbLf
-p.issueLog = p.issueLog & "Starting Analysis ->" & vbLf
 
 ' Main code loop
 If ActiveProject.StatusDate = "NA" Then MsgBox "The Project Status Date has not been set", vbOKOnly
@@ -69,6 +51,16 @@ Application.Calculation = pjManual
 Application.ScreenUpdating = False
 n = 1
 p.continue = ProjectQAView.loopstate
+If p.continue Then
+    p.addHeaderToIssueLog
+Else
+    p.ShowWelcome
+    Call ProjectQAView.refreshIssueLog(p)
+End If
+p.codeStartTime = Now()                   ' capture the start time of the code
+
+' -------------------- MAIN LOOP -------------------------------------------------------
+
 While (p.continue = True) And (n <= p.TaskCount)
     
     ' calculate the time remaining to run
@@ -84,7 +76,7 @@ While (p.continue = True) And (n <= p.TaskCount)
     
     ' add the summary tasks
     If ActiveProject.Tasks(n).Summary = True Then p.SLcount = p.SLcount + 1
-1
+
     'If (Not ActiveProject.Tasks(n) Is Nothing) And (ActiveProject.Tasks(n).percentComplete <> 100) Then
     If (ActiveProject.Tasks(n).percentComplete <> 100) And (Not ActiveProject.Tasks(n).Summary) Then
         p.percentComplete = p.TCount / p.TaskCount * 100              ' calculate the percent complete
@@ -105,8 +97,7 @@ While (p.continue = True) And (n <= p.TaskCount)
             Call ProjectQAView.update_task8weeks(p)
         End If
         
-        ' Update the Issue log display
-        Call ProjectQAView.refreshIssueLog(p)
+        
         
         ' checks that detect issues
         If ProjectQAView.cbOutBound Then
@@ -142,7 +133,7 @@ While (p.continue = True) And (n <= p.TaskCount)
         If ProjectQAView.cbNegFloat.Value Then
             Call p.check_NegFloat(n)
             Call ProjectQAView.update_NegFloat(p)
-            Call ProjectQAView.refreshIssueLog(p)
+           Call ProjectQAView.refreshIssueLog(p)
         End If
         If ProjectQAView.cbWorkPast.Value Then
             Call p.check_WorkInPast(n)
@@ -169,32 +160,37 @@ While (p.continue = True) And (n <= p.TaskCount)
             Call ProjectQAView.update_HardConstraints(p)
             Call ProjectQAView.refreshIssueLog(p)
         End If
-        
     End If
     Application.StatusBar = "Quality Assurance Analyser Running | Reading Task: " & p.TCount & "/" & p.TaskCount & " | " & p.percentComplete & "%"
+    
+    
     DoEvents
     p.continue = ProjectQAView.loopstate
     n = n + 1
 Wend
-
 ' ********************************************************************************************
 ' END OF LOOP
 ' ********************************************************************************************
+If p.continue Then
 
-' update the form buttons to show print button and close caption
-Call ProjectQAView.finished(p)
+    p.calc_Issues
+    Call ProjectQAView.refreshIssueCount(p)
 
-' calculate the stats for the summary
-p.calculate
+    ' update the form buttons to show print button and close caption
+    Call ProjectQAView.finished(p)
 
-' add the summary information to the issue log
-p.addSummaryToIssueLog
+    ' calculate the stats for the summary
+    p.calculate
 
-' update the issuelog textbox
-Call ProjectQAView.refreshIssueLog(p)
-Call ProjectQAView.refreshAll(p)
-Call ProjectQAView.TogglePrintButton
-'TODO The next line caused a crash when Sean ran it on Project 2010. the message was 'error 1100: the method is not available in this situation'
-Application.Calculation = pjAutomatic
+    ' add the summary information to the issue log
+    p.addSummaryToIssueLog
+
+    ' update the issuelog textbox
+    Call ProjectQAView.refreshIssueLog(p)
+    Call ProjectQAView.refreshAll(p)
+    Call ProjectQAView.TogglePrintButton
+    'TODO The next line caused a crash when Sean ran it on Project 2010. the message was 'error 1100: the method is not available in this situation'
+    Application.Calculation = pjAutomatic
+End If
 Err:
 End Sub
