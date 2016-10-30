@@ -1,5 +1,12 @@
 Attribute VB_Name = "ProjectQAModule"
 Option Explicit
+<<<<<<< HEAD
+'Created by Kevin McAleer, Advice Factory Ltd, November 2014
+'Code optimised to run in a single pass, with a status message
+'Also added a dialogbox to show progress whilst running as well as updating the statusbar with progress.
+'There is now an about box as well
+'Version 2.1 06/11/2014
+=======
 ' +---------------------------------------------------------+
 ' | AUTHOR: Kevin McAleer / Sean Boyle                      |
 ' | EMAIL: kevin.mcaleer@advicefactory.co.uk                |
@@ -15,6 +22,7 @@ Option Explicit
 ' Code optimised to run in a single pass, with a status message
 ' Also added a dialogbox to show progress whilst running as well as updating the statusbar with progress.
 ' There is now an about box as well
+>>>>>>> kevinmcaleer/master
 
 'TODO: Refactor the variable names to improve legability
 'TODO: Do file check and project status date checks before running any code.
